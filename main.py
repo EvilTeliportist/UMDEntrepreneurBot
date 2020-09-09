@@ -6,6 +6,7 @@ bot = commands.Bot(command_prefix = '!', description = "Bot for the UMD Entrepre
 yearRoles = ['2021', '2022', '2023', '2024']
 majorRoles = ['CMSC', 'ENAE', 'ENEE', 'MATH', 'PHYS', 'BMGT', 'ENME', 'LTSC', 'BSCI', 'INST', 'PSYC', 'GVPT', 'BIOE']
 
+
 def canPurge(m):
     return not (m.author.bot and "purged by" in m.content)
 
@@ -20,8 +21,11 @@ async def on_ready():
 
 @bot.command(description = 'Shuts down the bot. Only usable by admin.')
 async def shutdown(ctx):
-    sys.exit()
-
+    member = ctx.message.author
+    if get(ctx.guild.roles, name = 'Moderator') in member.roles:
+        sys.exit()
+    else:
+        await ctx.send("Sorry, only moderators can use this command.")
 
 @bot.command(desciption = 'For adding your graduation year.')
 async def year(ctx, year: str):
@@ -48,7 +52,7 @@ async def major(ctx, major: str):
 @bot.command(description = 'Wipes a channel of its messages.')
 async def purge(ctx, l: int):
     member = ctx.message.author
-    if get(ctx.guild.roles, name = 'Admin') in member.roles:
+    if get(ctx.guild.roles, name = 'Moderator') in member.roles:
         if l == 0:
             deleted = await ctx.message.channel.purge(limit = 99999999, check = canPurge)
             await ctx.send("Channel purged by " + ctx.message.author.mention + " at " + datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S"))
@@ -56,7 +60,7 @@ async def purge(ctx, l: int):
             deleted = await ctx.message.channel.purge(limit = l, check = canPurge)
             await ctx.send(str(len(deleted)) + " messages purged by " + ctx.message.author.mention + " at " + datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S"))
     else:
-        await ctx.send("Sorry, only administrators can use this command.")
+        await ctx.send("Sorry, only moderators can use this command.")
 
 
-bot.run('NzUzMjg1NzY2NDEwNDAzODUx.X1j-Cg.E46AzygkeFz09pWRPD_QQ3sxxyQ')
+bot.run(os.environ.get('discord_token'))
